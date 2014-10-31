@@ -31,8 +31,10 @@ public class DisplayFrame extends JFrame {
         _mazeSolver = new MazeSolver(_mazePanel, p, value);
     }
 
-    void logic() {
+    public void logic() {
         _mazeSolver.findWay();
     }
+
+   
 
 }

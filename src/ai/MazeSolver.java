@@ -8,6 +8,7 @@ package ai;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JFrame;
 import javax.swing.JPanel;
 import main.Map;
 
@@ -25,12 +26,14 @@ public class MazeSolver {
 
     private float _xPos = 1.0f;
     private float _yPos = 1.0f;
-    private final JPanel _jframe;
+    private final JPanel _jpanel;
+    
 
     public MazeSolver(JPanel frame, Map map, PathDirections pathDirections) {
         this._map = map;
         this.path = pathDirections;
-        this._jframe = frame;
+        this._jpanel = frame;
+        
     }
 
     public int findWay() {
@@ -52,7 +55,7 @@ public class MazeSolver {
 
         if (_map.data[y][x] == Map.EXIT) {
             _map.data[y][x] = Map.EXIT_FOUND;
-            _jframe.repaint();
+            _jpanel.repaint();
             return 1;
         } else if (_map.data[y][x] == Map.MARKED) {
             return 0;
@@ -61,13 +64,15 @@ public class MazeSolver {
         } else {
             //mark current position
             _map.data[y][x] = Map.MARKED;
-            _jframe.repaint();
+            _jpanel.repaint();
+            
             try {
                 Thread.sleep(100);
 
             } catch (Exception ex) {
                 Logger.getLogger(MazeSolver.class.getName()).log(Level.SEVERE, null, ex);
             }
+         
             if (path.equals(PathDirections.URDL)) {
                 if (findWay(y - 1, x, path) == 1) {
                     return 1;
