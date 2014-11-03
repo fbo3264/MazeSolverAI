@@ -29,11 +29,9 @@ public class MazePanel extends JPanel {
         _map = m;
     }
 
-   
-
     @Override
     protected void paintComponent(Graphics g) {
-         System.out.println("aha");
+
         Graphics2D g2d = (Graphics2D) g;
 
         //clear the screen
@@ -42,6 +40,5 @@ public class MazePanel extends JPanel {
 
         _map.paint(g2d);
     }
-    
 
 }

@@ -35,6 +35,10 @@ public class DisplayFrame extends JFrame {
         _mazeSolver.findWay();
     }
 
+    Runnable getSolverThread() {
+        return _mazeSolver;
+    }
+
    
 
 }

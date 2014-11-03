@@ -18,9 +18,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import threads.FrameMonitor;
 
 /**
  *
@@ -42,6 +46,7 @@ public class ControlFrame extends JFrame {
     private Map _map = new Map();
     private boolean _simStarted = false;
     private final List<DisplayFrame> _simulationFrames = new ArrayList<>();
+    public static final FrameMonitor _frameMonitor = new FrameMonitor();
 
     public ControlFrame() {
         this.setLayout(new BorderLayout());
@@ -71,8 +76,6 @@ public class ControlFrame extends JFrame {
                 System.out.println("click");
 
                 startSimulation();
-
-                //fire "start" event
             }
         });
 
@@ -80,6 +83,29 @@ public class ControlFrame extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
+                System.out.println("hm");
+                synchronized (_frameMonitor) {
+                    if (_frameMonitor._pauseExecution == true) {
+                        SwingUtilities.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                _pauseSimBtn.setText("Pause Simulation");
+                            }
+                        });
+                        _frameMonitor._pauseExecution = false;
+                        _frameMonitor.notifyAll();
+                    } else {
+                        SwingUtilities.invokeLater(new Runnable() {
+
+                            @Override
+                            public void run() {
+                                _pauseSimBtn.setText("Continue Simulation");
+                            }
+                        });
+                        _frameMonitor._pauseExecution = true;
+                    }
+                }
 
             }
         });
@@ -118,29 +144,15 @@ public class ControlFrame extends JFrame {
 
         }
 
-        Thread t = new Thread() {
-
-            @Override
-            public void run() {
-                _mazeSolver = new MazeSolver(_mazePanel, _map, PathDirections.values()[PathDirections.values().length - 1]);
-                _mazeSolver.findWay();
-            }
-
-        };
+        _mazeSolver = new MazeSolver(_mazePanel, _map, PathDirections.values()[PathDirections.values().length - 1]);
+        Thread t = new Thread(_mazeSolver);
         t.start();
 
         for (final DisplayFrame sFrame : _simulationFrames) {
-            Thread currThread = new Thread() {
+            Thread currThread = new Thread(sFrame.getSolverThread());
 
-                @Override
-                public void run() {
-                    sFrame.logic();
-                }
-
-            };
             currThread.start();
         }
-        
 
     }
 
