@@ -1,14 +1,15 @@
 package main;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
+import java.awt.Graphics;
+import java.util.Arrays;
 
 /**
  * The map holds the data about game area. In this case its responsible for both
  * rendering the map and check collision against the grid cells within.
  *
  * Our map is a simple WIDTHxHEIGHT grid containing value 0 to indicate a clear
- * cell and 1 to incidate a wall.
+ * cell and 1 to indicate a wall.
  *
  * @author Kevin Glass
  */
@@ -17,6 +18,7 @@ public class Map {
     public static final int MARKED = 2;
     public static final int EXIT = 3;
     public static final int EXIT_FOUND = 4;
+    public static final int CURRENT_POS = 5;
 
     /**
      * The value indicating a clear cell
@@ -30,11 +32,11 @@ public class Map {
     /**
      * The width in grid cells of our map
      */
-    public static final int WIDTH = 15;
+    public static int WIDTH = 15;
     /**
      * The height in grid cells of our map
      */
-    public static final int HEIGHT = 15;
+    public static int HEIGHT = 15;
 
     /**
      * The rendered size of the tile (in pixels)
@@ -81,13 +83,51 @@ public class Map {
         data[14][7] = EXIT;
     }
 
+    public Map(int w, int h) {
+        data = new int[h][w];
+        WIDTH = w;
+        HEIGHT = h;
+
+        for (int i = 0; i <= (int) ((w * h) * 0.4); i++) {
+            int idx = (int) (Math.random() * (WIDTH - 1));
+            int idy = (int) (Math.random() * (HEIGHT - 1));
+            data[idy][idx] = BLOCKED;
+        }
+
+    }
+
     /**
      * Copy constructor
      *
      * @param p
      */
-    Map(Map p) {
+    public Map(Map p) {
         this.data = p.data;
+    }
+
+    /**
+     * Prints the map to the console
+     */
+    public void printMap() {
+        for (int i = 0; i < WIDTH; i++) {
+            System.out.print("--");
+        }
+        System.out.println();
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                if (data[i][j] == BLOCKED) {
+                    System.out.print("X|");
+                } else {
+                    System.out.print(" |");
+                }
+            }
+            System.out.println();
+            for (int k = 0; k < WIDTH; k++) {
+                System.out.print("--");
+            }
+            System.out.println();
+        }
+
     }
 
     /**
@@ -96,7 +136,7 @@ public class Map {
      *
      * @param g The graphics context on which to draw the map
      */
-    public void paint(Graphics2D g) {
+    public void paint(Graphics g) {
         // loop through all the tiles in the map rendering them
         // based on whether they block or not
         for (int x = 0; x < WIDTH; x++) {
@@ -124,6 +164,17 @@ public class Map {
                         g.setColor(Color.red);
                         g.fillOval((int) x * TILE_SIZE + 5, (int) y * TILE_SIZE + 5, TILE_SIZE / 2, TILE_SIZE / 2);
                     }
+                } else if (data[x][y] == CURRENT_POS) {
+                    g.setColor(Color.darkGray);
+                    // draw the rectangle with a dark outline
+                    g.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    g.setColor(g.getColor().darker());
+                    g.drawRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    //draw the current pos as an arrow
+                    int[] xList = {(int) x * TILE_SIZE + 5, (int) x * TILE_SIZE + 10, (int) x * TILE_SIZE + 15};
+                    int[] yList = {(int) y * TILE_SIZE + 2, (int) y * TILE_SIZE + 15, (int) y * TILE_SIZE + 2};
+                    g.setColor(Color.red);
+                    g.fillPolygon(xList, yList, 3);
                 } else {
                     g.setColor(Color.darkGray);
                     if (data[x][y] == BLOCKED) {
@@ -148,9 +199,19 @@ public class Map {
      * @param y The y position to check for blocking
      * @return True if the location is blocked
      */
-    public boolean blocked(float x, float y) {
+    public boolean blockedOrOutOfIdx(float x, float y) {
         // look up the right cell (based on simply rounding the floating
         // values) and check the value
-        return data[(int) x][(int) y] == BLOCKED;
+        try {
+            int idxX = (int) x;
+            int idxY = (int) y;
+            if (idxX < 0 || idxX >= WIDTH || idxY < 0 || idxY >= HEIGHT) {
+                return true;
+            }
+            return data[idxY][idxX] == BLOCKED;
+        } catch (ArrayIndexOutOfBoundsException aie) {
+            System.out.println(Arrays.toString(aie.getStackTrace()));
+        }
+        return true;
     }
 }

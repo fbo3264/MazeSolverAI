@@ -95,6 +95,7 @@ public class ControlFrame extends JFrame {
                         });
                         _frameMonitor._pauseExecution = false;
                         _frameMonitor.notifyAll();
+
                     } else {
                         SwingUtilities.invokeLater(new Runnable() {
 

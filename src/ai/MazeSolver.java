@@ -29,15 +29,14 @@ public class MazeSolver implements Runnable {
 
     private float _xPos = 1.0f;
     private float _yPos = 1.0f;
-    private final JPanel _jpanel;
+    private final MazePanel _jpanel;
 
-    public MazeSolver(JPanel frame, Map map, PathDirections pathDirections) {
+    public MazeSolver(MazePanel frame, Map map, PathDirections pathDirections) {
         this._map = map;
         this.path = pathDirections;
         this._jpanel = frame;
 
     }
-    
 
     public int findWay() {
 
@@ -153,6 +152,7 @@ public class MazeSolver implements Runnable {
     }
 
     public int findWayAsync(int y, int x, PathDirections path) throws IOException {
+
         synchronized (ControlFrame._frameMonitor) {
             if (ControlFrame._frameMonitor._pauseExecution == true) {
                 try {
@@ -162,7 +162,7 @@ public class MazeSolver implements Runnable {
                     Logger.getLogger(MazeSolver.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            }
+        }
 
         if (_map.data[y][x] == Map.EXIT) {
             _map.data[y][x] = Map.EXIT_FOUND;
@@ -174,8 +174,12 @@ public class MazeSolver implements Runnable {
             return -1;
         } else {
             //mark current position
+            _map.data[y][x] = Map.CURRENT_POS;
+            
+            //WORKS BUT FLICKERS: _jpanel.paint(_jpanel.getGraphics());
+            _jpanel.updateMap();
+            
             _map.data[y][x] = Map.MARKED;
-            _jpanel.repaint();
 
             try {
                 Thread.sleep(100);
@@ -254,7 +258,7 @@ public class MazeSolver implements Runnable {
                 return -1;
             }
             //reset position
-            _map.data[y][x] = Map.CLEAR;
+            //  _map.data[y][x] = Map.CLEAR;
             return -1;
 
         }
