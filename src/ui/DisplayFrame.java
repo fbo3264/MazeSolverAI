@@ -21,26 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package main;
+package ui;
 
-import ui.ControlFrame;
-import javax.swing.SwingUtilities;
+import ai.MazeSolver;
+import ai.PathDirections;
+import javax.swing.JFrame;
 
 /**
  *
  * @author fbo
  */
-public class Simulation {
+public class DisplayFrame extends JFrame {
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                ControlFrame app = new ControlFrame();
-                app.setVisible(true);
-            }
-        });
+    private MazeSolver _mazeSolver;
 
+    private final MazePanel _mazePanel;
+
+    public DisplayFrame(Map p, PathDirections value) {
+
+        _mazePanel = new MazePanel(p);
+        this.add(_mazePanel);
+
+        this.setVisible(true);
+        this.pack();
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        _mazeSolver = new MazeSolver(_mazePanel, p, value);
+    }
+
+    public DisplayFrame(Map p) {
+
+        _mazePanel = new MazePanel(p);
+        this.add(_mazePanel);
+
+        this.setVisible(true);
+        this.pack();
+        this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+    }
+
+    public void logic() {
+        _mazeSolver.findWay();
+    }
+
+    Runnable getSolverThread() {
+        return _mazeSolver;
     }
 
 }

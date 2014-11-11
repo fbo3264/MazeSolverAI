@@ -1,15 +1,35 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * The MIT License
+ *
+ * Copyright 2014 Friedrich Bösch.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
 package graph;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.TreeSet;
-import main.Map;
+import java.util.Queue;
+import java.util.Stack;
+import ui.Map;
 
 /**
  *
@@ -36,7 +56,23 @@ public class Graph implements GraphModel {
         return g;
     }
 
-    public void printGraph() {
+    public Graph(List<Vertex> vlist, List<Edge> eList) {
+        this._vertices = vlist;
+        _adjList = new HashMap<>();
+        for (Vertex v : vlist) {
+            if (!_adjList.containsKey(v)) {
+                _adjList.put(v, new ArrayList<Edge>());
+                for (Edge currEdge : eList) {
+                    if (currEdge.getSourceVertex().equals(v)) {
+                        _adjList.get(v).add(currEdge);
+                    }
+                }
+            }
+        }
+    }
+
+    @Override
+    public void debugGraph() {
 
         for (Vertex _vertice : _vertices) {
             System.out.println("Vertex " + _vertice.name + ":");
@@ -165,12 +201,76 @@ public class Graph implements GraphModel {
         }
     }
 
-    public static void main(String[] args) {
-        Map m = new Map(10, 7);
-        m.printMap();
-        System.out.println("");
-        Graph g = Graph.generateGraphFromMap(m);
-        g.printGraph();
+    public List<Vertex> getVertices() {
+        return _vertices;
     }
 
+    public List<Edge> getEdges() {
+        List<Edge> edges = new ArrayList<>();
+        for (java.util.Map.Entry<Vertex, List<Edge>> entrySet : _adjList.entrySet()) {
+            Vertex key = entrySet.getKey();
+            List<Edge> value = entrySet.getValue();
+            for (Edge currEdge : value) {
+                edges.add(currEdge);
+            }
+
+        }
+        return edges;
+    }
+
+    public void traverseDFS() {
+        for (Vertex _vertice : _vertices) {
+            traverseDFS(_vertice);
+        }
+
+    }
+
+    public void traverseDFS(Vertex currentVertex) {
+        if (!currentVertex.discovered) {
+            currentVertex.setDiscovered();
+            System.out.println(currentVertex.toString());
+            for (Edge outEdge : outEdges(currentVertex)) {
+                traverseDFS(outEdge.getDestVertex());
+            }
+        }
+    }
+
+    public void traverseIterativeDFS() {
+        Stack<Vertex> stack = new Stack<>();
+        stack.push(_vertices.get(0));
+        while (!stack.empty()) {
+            Vertex curr = stack.pop();
+            curr.setDiscovered();
+            System.out.println(curr.toString());
+            for (Edge outEdge : outEdges(curr)) {
+                Vertex next = outEdge.getDestVertex();
+                if (!next.discovered) {
+                    stack.push(next);
+                }
+            }
+        }
+    }
+
+    public void reset() {
+        for (Vertex _vertice : _vertices) {
+            _vertice.reset();
+        }
+    }
+
+    public void traverseBFS() {
+        Queue<Vertex> q = new LinkedList<>();
+        q.offer(_vertices.get(0));
+        while (!q.isEmpty()) {
+            Vertex curr = q.remove();
+            curr.setProcessed();
+            System.out.println(curr.toString());
+            for (Edge outEdge : outEdges(curr)) {
+                Vertex next = outEdge.getDestVertex();
+                if (!next.discovered && !next.processed) {
+                    next.setDiscovered();
+                    q.offer(next);
+                }
+            }
+        }
+    }
 }

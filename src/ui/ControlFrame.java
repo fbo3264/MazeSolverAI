@@ -1,9 +1,27 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+/* 
+ * The MIT License
+ *
+ * Copyright 2014 Friedrich Bösch.
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
  */
-package main;
+package ui;
 
 import ai.MazeSolver;
 import ai.PathDirections;
@@ -43,7 +61,7 @@ public class ControlFrame extends JFrame {
 
     //*******End GUI components **********
     private MazeSolver _mazeSolver;
-    private Map _map = new Map();
+    private Map _map = new Map(true);
     private boolean _simStarted = false;
     private final List<DisplayFrame> _simulationFrames = new ArrayList<>();
     public static final FrameMonitor _frameMonitor = new FrameMonitor();
@@ -59,6 +77,7 @@ public class ControlFrame extends JFrame {
 
         this.add(_btnPanel, BorderLayout.WEST);
         this._mazePanel = new MazePanel(_map);
+        _map.DEBUG = true;
         this.add(_mazePanel, BorderLayout.CENTER);
 
         initBtnClickListeners();
@@ -73,8 +92,6 @@ public class ControlFrame extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                System.out.println("click");
-
                 startSimulation();
             }
         });
@@ -83,7 +100,6 @@ public class ControlFrame extends JFrame {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                System.out.println("hm");
                 synchronized (_frameMonitor) {
                     if (_frameMonitor._pauseExecution == true) {
                         SwingUtilities.invokeLater(new Runnable() {
@@ -129,7 +145,7 @@ public class ControlFrame extends JFrame {
 
         for (int i = 0; i < PathDirections.values().length - 1; i++) {
 
-            // position frame            
+            // position frames
             if (i == 0) {
                 currX = this.getWidth();
             } else if (currX + MazePanel.PANEL_WIDTH >= rect.width) {
@@ -138,7 +154,8 @@ public class ControlFrame extends JFrame {
             } else {
                 currX += MazePanel.PANEL_WIDTH;
             }
-            DisplayFrame df = new DisplayFrame(_map, PathDirections.values()[i]);
+            
+            DisplayFrame df = new DisplayFrame(new Map(true), PathDirections.values()[i]);
             df.setLocation(currX, currY);
 
             this._simulationFrames.add(df);
@@ -150,7 +167,7 @@ public class ControlFrame extends JFrame {
         t.start();
 
         for (final DisplayFrame sFrame : _simulationFrames) {
-            Thread currThread = new Thread(sFrame.getSolverThread());
+            Thread currThread = new Thread(sFrame.getSolverThread());            
 
             currThread.start();
         }
